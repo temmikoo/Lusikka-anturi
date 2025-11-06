@@ -26,5 +26,11 @@ def read_voltage():
 # Pääohjelmasilmukka
 while True:
     voltage = read_voltage()
-    print("Jännite: {:.3f} V".format(voltage))
+    
+    # Laske lämpötila siirtofunktion avulla
+    temperature = 145.1 * voltage - 68.25
+
+    # Tulosta molemmat arvot
+    print("Jännite: {:.3f} V  |  Lämpötila: {:.1f} °C".format(voltage, temperature))
+    
     sleep(DELAY)
