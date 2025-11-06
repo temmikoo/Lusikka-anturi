@@ -41,6 +41,7 @@ while True:
 
     # Tulostus LCD:lle
     lcd.clear()
-    lcd.putstr("Lampotila:\n{:.1f} C".format(temperature))
+    lcd.putstr("Lampotila:\n{:.1f}{}C".format(temperature, DEG))
+
     
     sleep(DELAY)
