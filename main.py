@@ -3,11 +3,14 @@ from time import sleep
 from pico_i2c_lcd import I2cLcd
 
 # =============================
-# LUSIKKA-ANTURI / JÄNNITEJAKO
+# LUSIKKA-ANTURI (LÄMPÖMITTARI)
+# PAPERI-FOLIO-ANTURI (VUOTOVAHTI)
 # =============================
 
-# ADC0 on fyysisesti GP26
+# ADC0 (Lämpömittari)
 adc = ADC(Pin(26))
+# ADC1 (Vuotovahti)
+adc_hum = ADC(Pin(27))
 
 # I2C-yhteys LCD:lle
 i2c = I2C(1, sda=Pin(14), scl=Pin(15), freq=400000)
@@ -15,17 +18,23 @@ lcd = I2cLcd(i2c, 0x27, 2, 16)
 DEG = chr(223)                   # °-merkki
 
 # Perusasetukset
-VCC = 3.3        # käyttöjännite (Picon 3.3V)
-SAMPLES = 10     # montako lukemaa keskiarvoistetaan
-DELAY = 2.0      # sekuntia mittausten välillä
+VCC = 3.3           # käyttöjännite (Picon 3.3V)
+SAMPLES = 10        # montako lukemaa keskiarvoistetaan
+DELAY = 2.0         # sekuntia mittausten välillä
+THRESHOLD = 40000   # Vuotovahdin raja-arvo
 
-# LED kytkennät
+# Lämpötilailmaisimen LED kytkennät
 
 led1 = Pin(6, Pin.OUT)
 led2 = Pin(5, Pin.OUT)
 led3 = Pin(4, Pin.OUT)
 led4 = Pin(3, Pin.OUT)
 led5 = Pin(2, Pin.OUT)
+
+# Vuotovahdin LED kytkennät
+led_green = Pin(10, Pin.OUT)
+led_red = Pin(11, Pin.OUT)
+
 
 # Funktio jännitteen mittaukseen
 def read_voltage():
@@ -38,7 +47,6 @@ def read_voltage():
     return voltage
 
 # Funktio LED indikaattorille
-
 def light_leds(count):
     leds = [led1, led2, led3, led4, led5]
 
@@ -47,6 +55,21 @@ def light_leds(count):
             led.on()
         else:
             led.off()
+
+# Funktio vuotovahdille
+def check_leak():
+    value = adc_hum.read_u16()
+
+    if value > THRESHOLD:
+        # Märkä → punainen LED palaa
+        led_green.off()
+        led_red.on()
+        print("!! Vuoto havaittu !!")
+    else:
+        # Kuiva → vihreä LED palaa
+        led_red.off()
+        led_green.on()
+        print("Vuotovahti: ", value)
 
 # Pääohjelmasilmukka
 while True:
@@ -75,30 +98,39 @@ while True:
 
     # Ylikuumeneminen
     elif temperature > 50:
+        light_leds(5)
+        sleep (1)
+        light_leds(0)
+        sleep(0.01)
 
-        # LED vilkutus
-        while temperature > 50:
-            light_leds(5)
-            sleep (0.2)
-            light_leds(0)
-            sleep(0.2)
-
-            print("!! Ylikuumeneminen !!  {:.1f} C".format(temperature))
-            lcd.move_to(0, 0)
-            lcd.putstr("VAROITUS!      ")
-            lcd.move_to(0, 1)
-            lcd.putstr("{:.1f}{}C      ".format(temperature, DEG))
+        print("!! Ylikuumeneminen !!  {:.1f} C".format(temperature))
+        lcd.move_to(0, 0)
+        lcd.putstr("VAROITUS!      ")
+        lcd.move_to(0, 1)
+        lcd.putstr("{:.1f}{}C      ".format(temperature, DEG))
 
 
-            voltage = read_voltage()
-            temperature = 145.1 * voltage - 68.25
+        voltage = read_voltage()
+        temperature = 145.1 * voltage - 68.25
 
     # Tulosta molemmat arvot
     print("Jännite: {:.3f} V  |  Lämpötila: {:.1f} °C".format(voltage, temperature))
 
-    # Tulostus LCD:lle
-    lcd.clear()
-    lcd.putstr("Lampotila:\n{:.1f}{}C".format(temperature, DEG))
+    # LCD-näyttö
+    if temperature > 50:
+        lcd.clear()
+        lcd.putstr("VAROITUS!\n{:.1f}{}C".format(temperature, DEG))
+    else:
+        lcd.clear()
+        lcd.putstr("Lampotila:\n{:.1f}{}C".format(temperature, DEG))
 
-    
-    sleep(DELAY)
+    check_leak()
+
+    # Ylikuumenemisen aikana pidä silmukka nopeana,
+    # jotta LED-vilkku ja LCD-päivitys toimivat oikein
+
+    if temperature > 50:
+        sleep(0.01)
+    else:
+        sleep(DELAY)
+
