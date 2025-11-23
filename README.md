@@ -40,7 +40,7 @@ LCD näyttää joko lämpötilan tai varoituksen tilanteen mukaan.
 - Laskee keskiarvon ja muuntaa jännitteeksi välille 0–3.3 V.  
 
 ### `light_leds(count)`
-- Ohjaa lämpötilan LED-pylvästä sytyttämällä `count` ensimmäistä LEDiä.
+- Ohjaa lämpötilan LED-pylvästä sytyttämällä lämpötilan raja-arvojen mukaan määritellyn määrän LED-valoja.
 
 ### `check_leak()`
 - Lukee kosteussensorin arvon ADC1:stä.  
