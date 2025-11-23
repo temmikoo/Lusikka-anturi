@@ -1,7 +1,6 @@
 # Lämpötila- ja vuotovahtijärjestelmä (Raspberry Pi Pico)
 
 Tämä projekti käyttää kahta anturia (lämpö ja kosteus), LED-indikaattoreita sekä I2C-LCD-näyttöä.  
-Dokumentaation tarkoitus on auttaa opiskelijaa tekemään ohjelmasta vuokaavio koulutehtävää varten.
 
 
 ## ## 1. Yleinen toiminta
