@@ -6,7 +6,7 @@ Tämä projekti käyttää kahta anturia (lämpö ja kosteus), LED-indikaattorei
 ## ## 1. Yleinen toiminta
 
 - ADC0 lukee **lämpötila-anturin** jännitteen, joka muutetaan lämpötilaksi siirtofunktiolla.  
-- ADC1 lukee **paperi-folio anturin** kosteusarvon ja toimii vuotovahdin rajana.  
+- ADC1 lukee **paperi-folio anturin** kosteusarvon ja toimii vuotovahtina. 
 - Lämpötilan mukaan syttyy **LED-pylväs (1–5 LEDiä)**.  
 - Lämpötilan ylittäessä 50°C LED-palkki **vilkkuu** ja LCD näyttää varoitustekstin.  
 - Vuotovahdin LEDit näyttävät tilanteen:
