@@ -1,6 +1,8 @@
 from machine import ADC, Pin, I2C
 from time import sleep
 from pico_i2c_lcd import I2cLcd
+import network
+import urequests
 
 # =============================
 # LUSIKKA-ANTURI (LÄMPÖMITTARI)
@@ -34,6 +36,48 @@ led5 = Pin(2, Pin.OUT)
 # Vuotovahdin LED kytkennät
 led_green = Pin(10, Pin.OUT)
 led_red = Pin(11, Pin.OUT)
+
+# =============================
+# THINGSPEAK-ASETUKSET
+# =============================
+SSID = "Wokwi-GUEST"
+PASSWORD = ""
+
+WRITE_API_KEY = "RDNRM48C5ODU3MSR"
+CHANNEL_ID = "Y3190908"
+
+# -----------------------------
+# WIFI-YHTEYS
+# -----------------------------
+def connect_wifi():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    wlan.connect(SSID, PASSWORD)
+
+    print("WiFi: Connecting", end="")
+    while not wlan.isconnected():
+        print(".", end="")
+        sleep(0.3)
+
+    print("\nWiFi Connected:", wlan.ifconfig()[0])
+
+# -----------------------------
+# THINGSPEAK-LÄHETYS
+# -----------------------------
+def send_to_thingspeak(temp, leak_value):
+    url = (
+        f"https://api.thingspeak.com/update?"
+        f"api_key={WRITE_API_KEY}"
+        f"&field1={temp}"
+        f"&field2={leak_value}"
+    )
+
+    try:
+        r = urequests.get(url)
+        print("ThingSpeak:", r.text)
+        r.close()
+    except Exception as e:
+        print("TS error:", e)
 
 
 # Funktio jännitteen mittaukseen
@@ -70,8 +114,10 @@ def check_leak():
         led_red.off()
         led_green.on()
         print("Vuotovahti: ", value)
+    return value
 
 # Pääohjelmasilmukka
+connect_wifi()
 while True:
     voltage = read_voltage()
     
@@ -124,7 +170,12 @@ while True:
         lcd.clear()
         lcd.putstr("Lampotila:\n{:.1f}{}C".format(temperature, DEG))
 
-    check_leak()
+    leak_value = check_leak()
+
+    # -------------------------
+    # Lähetä tiedot ThingSpeakiin
+    # -------------------------
+    send_to_thingspeak(temperature, leak_value)
 
     # Ylikuumenemisen aikana pidä silmukka nopeana,
     # jotta LED-vilkku ja LCD-päivitys toimivat oikein
