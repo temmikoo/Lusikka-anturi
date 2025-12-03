@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fi">
+  <head>
+    <meta charset="utf-8" />
+    <title>ThingSpeak → Google Chart</title>
+
+    <!-- Google Charts loader -->
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+
+    <!-- oma scripti joka sisältää ThingSpeak-haun ja piirtämisen -->
+    <script src="chart.js"></script>
+
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 20px;
+      }
+      #chart_status {
+        margin-bottom: 8px;
+        color: #333;
+      }
+      #range_buttons {
+        margin-bottom: 12px;
+      }
+      #range_buttons button {
+        background-color: #f0f0f0;
+        border: none;
+        padding: 8px 16px;
+        margin-right: 6px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+      #range_buttons button:hover {
+        background-color: #ddd;
+      }
+      #range_buttons button.active {
+        background-color: #3498db;
+        color: white;
+        font-weight: bold;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Lämpötilasensori ja vuotovahti</h1>
+    <div id="range_buttons">
+      <button id="btn_day" class="active">Day</button>
+      <button id="btn_week">Week</button>
+      <button id="btn_month">Month</button>
+    </div>
+    <div id="curve_chart" style="width: 900px; height: 500px"></div>
+    <div id="chart_status" style="margin-top: 10px"></div>
+    <div
+      id="last_update"
+      style="margin-top: 8px; font-size: 0.9em; color: #555"
+    ></div>
+    <div id="alert_indicator" style="margin-top: 10px; font-weight: bold"></div>
+  </body>
+</html>
